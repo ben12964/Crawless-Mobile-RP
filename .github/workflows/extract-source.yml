@@ -1,0 +1,34 @@
+name: Extract Crawless Mobile RP source
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract source
+        run: |
+          test -f crawless-mobile-rp-source.zip
+          unzip -t crawless-mobile-rp-source.zip
+          mkdir -p /tmp/crawless-source
+          unzip -q crawless-mobile-rp-source.zip -d /tmp/crawless-source
+          test -d /tmp/crawless-source/original-mobile-rp
+          cp -a /tmp/crawless-source/original-mobile-rp/. .
+          test -f client/project.godot
+          test -f server/app/main.py
+
+      - name: Commit extracted files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Extract Crawless Mobile RP source"
+            git push
+          fi
